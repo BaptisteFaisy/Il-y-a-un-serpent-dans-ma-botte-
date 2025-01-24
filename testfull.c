@@ -13,7 +13,7 @@ void encrypt_section(void *data, size_t size, char *key) {
     }
 }
 
-void write_stub(int fd, Elf64_Addr entry_point, char *key) {
+void write_stub(int fd, Elf64_Addr entry_point) {
     unsigned char stub[] = {
         // Assembly stub pour décryptage
         0x48, 0x83, 0xEC, 0x20,             // sub    rsp,0x20
@@ -29,7 +29,7 @@ void write_stub(int fd, Elf64_Addr entry_point, char *key) {
     };
     
     memcpy(&stub[6], &entry_point, sizeof(entry_point));
-    write(fd, stub, STUB_SIZE);
+    write(fd, stub, sizeof(stub));
 }
 
 int main(int argc, char **argv) {
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     // Créer le nouveau fichier
     int out_fd = open("woody", O_WRONLY | O_CREAT | O_TRUNC, 0755);
     write(out_fd, data, st.st_size);
-    write_stub(out_fd, ehdr->e_entry, key);
+    write_stub(out_fd, ehdr->e_entry);
     
     // Modifier l'entête ELF
     lseek(out_fd, 0, SEEK_SET);
